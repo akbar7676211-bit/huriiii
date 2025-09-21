@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Pemutar Lirik Interaktif</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      color: #f8fafc;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Area Lirik */
+    #lyrics {
+      flex: 3;
+      padding: 30px;
+      overflow-y: auto;
+      font-size: 20px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      font-family: "Courier New", monospace;
+      scrollbar-width: thin;
+      scrollbar-color: #38bdf8 #1e293b;
+    }
+    #lyrics::-webkit-scrollbar {
+      width: 8px;
+    }
+    #lyrics::-webkit-scrollbar-thumb {
+      background: #38bdf8;
+      border-radius: 10px;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      flex: 1;
+      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 2px solid rgba(100, 116, 139, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin: 10px 0 20px 0;
+      color: #38bdf8;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    /* Judul lagu aktif */
+    #title {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #facc15;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+    }
+
+    /* Tombol daftar lagu */
+    button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+  <div id="lyrics">
+    <div id="title">Pilih Lagu di Sebelah ➡</div>
+  </div>
+
+  <div id="sidebar">
+    <h2>🎵 Daftar Lagu</h2>
+    <div id="song-list"></div>
+  </div>
+
+  <script>
+    const songs = {
+      "bergema sampai selamanya": {
+        lines: [
+          ["bersandar pada ku", 0.09],
+          ["taruh di bahu ku", 0.10],
+          ["relakan semua", 0.11],
+          ["bebas semau mu", 0.10],
+          ["percaya lah sayang ini", 0.08],
+          ["sayang kelewatan", 0.08],
+          ["ku sampaikan dalam nyanyian", 0.08],
+          ["bergema sampai selamanya", 0.08],
+        ],
+        delays: [1.25, 1.25, 1.52, 1.40, 0.10, 2.3, 1.10, 0.1]
+      },
+      "lantas": {
+        lines: [
+          ["lantas mengapa ku masih ", 0.10],
+          ["menaruh hati", 0.1],
+          ["padahal ku tahu kau telah", 0.10],
+          ["terikat janji", 0.1],
+          ["keliru ataukah bukan tak tahu", 0.10],
+          ["lupakan mu tapi aku tak mau", 0.10],
+          ["pantas kah aku menyimpan rasa cemburu", 0.08],
+          ["padahal bukan aku yang milikmu", 0.08],
+          ["sanggup sampai kapan ku tak tahu?", 0.08],
+          ["akan kah akal sehat menyadar kan ku", 0.08],
+        ],
+        delays: [0.5, 1.20, 0.5, 1.20, 2.35, 3.30, 3.5, 2.30, 2.40, 0.1]
+      },
+      "mejiku hibiniu": {
+        lines: [
+          ["di antara kau dan dana", 0.07],
+          ["di antara kau dan dana", 0.07],
+          ["di antara kau dan dana", 0.07],
+          ["di antara kau dan dana", 0.07],
+          ["di antara kau dan dana", 0.07],
+          ["cuma kamu tiada yang lain", 0.08],
+          ["ku bilang aku gak main main", 0.09],
+          ["apa yang kau mau kuturutin", 0.08],
+          ["sekarang kamu sama yang lain", 0.08],
+          ["awalnya ku cuma cobain", 0.09],
+          ["tapi ku ketagihan", 0.05],
+          ["ku bilang amin", 0.05],
+          ["sampai ke pelaminan", 0.08],
+          ["jangan di samaain", 0.08],
+          ["sama mantan mu bajingan", 0.08],
+          ["ulang lagi ku cari yang lain", 0.08],
+        ],
+        delays: [0.1, 0.1, 2.2, 0.1, 1.1, 1.60, 1.10, 1.34,
+                 1.45, 0.6, 1.5, 1.10, 0.1, 0.1, 0.50, 0.1]
+      },
+      "happiness": {
+        lines: [
+          ["when i turn 81 and forget things", 0.08],
+          ["will you still be proud", 0.08],
+          ["cause i am the one", 0.08],
+          ["who's waited this long", 0.08],
+          ["and i am the one", 0.08],
+          ["that might get it wrong", 0.08],
+          ["and i'll be the one", 0.08],
+          ["that will love you", 0.08],
+          ["the way i'm supposed to", 0.08],
+          ["girl, oh", 0.08],
+        ],
+        delays: [3.35, 4.55, 2.35, 1.50, 1.52, 1.45, 0.10, 2.3, 1.35, 0.1]
+      },
+      "the winner takes it all": {
+        lines: [
+          ["the gods may throw a dice", 0.08],
+          ["their minds as cold as ice", 0.08],
+          ["and someone way down here", 0.08],
+          ["loser someone dear", 0.08],
+          ["the Winner takes all", 0.08],
+          ["the loser has to fall", 0.08],
+          ["it's simple and it's plain", 0.08],
+          ["why should i complain", 0.08],
+        ],
+        delays: [1.5, 1.58, 1.8, 2.10, 2.30, 2.0, 1.6, 1.5]
+      },
+      "aku dah lupa": {
+        lines: [
+          ["tak nak pusing, tak nak tanya", 0.08],
+          ["aku kuat tanpa drama", 0.09],
+          ["aku dah lupa, tak ingat lagi", 0.09],
+          ["nama kau pun hilang dari hati", 0.08],
+          ["aku move on, hidup sendiri", 0.08],
+          ["tak perlu kau, aku happy", 0.07],
+          ["aku dah lupa, tak ingat lagi", 0.08],
+          ["nama kau pun hilang dari hati", 0.09],
+          ["aku move on, hidup sendiri", 0.08],
+          ["tak perlu kau, aku happy", 0.08],
+          ["............", 0.20],
+        ],
+        delays: [0.1, 0.1, 0.1, 0.1, 0.2, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1]
+      },
+      "monolog": {
+        lines: [
+          ["bunga di bulan sepi", 0.10],
+          ["jatuh tersampar", 0.07],
+          ["tersasar", 0.07],
+          ["alasan masi bersama", 0.07],
+          ["bukan kerena terlanjur lama", 0.07],
+          ["tapi rasanya", 0.08],
+          ["yang masih sama", 0.09],
+          ["seperti sejak pertama jumpa", 0.08],
+          ["diri mu di kala senja", 0.08],
+          ["duduk berdua", 0.09],
+          ["tanpa suara......", 0.05],
+        ],
+        delays: [6.20, 4.45, 5.2, 2.55, 2.68, 3.59, 5.55, 3.34, 1.45, 2.45, 4.50]
+      },
+      "best friends": {
+        lines: [
+          ["i say that happy", 0.10],
+          ["i say that happy", 0.07],
+          ["but no", 0.07],
+          ["no", 0.07],
+          ["no", 0.07],
+          ["no", 0.08],
+          ["no", 0.09],
+          ["no", 0.08],
+          ["no", 0.08],
+          ["oh, i still wanna be your favorite boy", 0.09],
+          ["i wanna be the one that makes your day", 0.05],
+          ["that one think about as you lie awake", 0.09],
+          ["and i can't wait to be your number", 0.09],
+          ["your number one", 0.09],
+        ],
+        delays: [1.20, 1.45, 0.5, 0.5, 0.5, 0.25, 0.5, 0.5,
+                 2.54, 2.10, 2.38, 0.5, 0.9, 1.0]
+      },
+    };
+
+    function playSong(title, lines, delays) {
+      const lyricsDiv = document.getElementById("lyrics");
+      const titleDiv = document.getElementById("title");
+      lyricsDiv.innerHTML = "";
+      titleDiv.textContent = title.toUpperCase();
+
+      let i = 0;
+
+      function printLine() {
+        if (i >= lines.length) return;
+
+        const [line, charDelay] = lines[i];
+        let j = 0;
+        const lineDiv = document.createElement("div");
+        lyricsDiv.appendChild(lineDiv);
+
+        function typeChar() {
+          if (j < line.length) {
+            lineDiv.textContent += line[j];
+            j++;
+            lyricsDiv.scrollTop = lyricsDiv.scrollHeight;
+            setTimeout(typeChar, charDelay * 1000);
+          } else {
+            setTimeout(() => {
+              i++;
+              printLine();
+            }, delays[i] * 1000);
+          }
+        }
+        typeChar();
+      }
+
+      printLine();
+    }
+
+    // Generate tombol
+    const listDiv = document.getElementById("song-list");
+    for (let title in songs) {
+      const btn = document.createElement("button");
+      btn.textContent = title;
+      btn.onclick = () => playSong(title, songs[title].lines, songs[title].delays);
+      listDiv.appendChild(btn);
+    }
+  </script>
+</body>
+</html>
